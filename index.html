@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasunich Class Puzzle Game Portal 🎮</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for 5th-grade Arcade & Playful Vibe -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Fredoka', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        pixel: ['"Press Start 2P"', 'cursive'],
+                    },
+                    colors: {
+                        arcadeYellow: '#FFD166',
+                        arcadePink: '#EF476F',
+                        arcadeBlue: '#118AB2',
+                        arcadeGreen: '#06D6A0',
+                        arcadePurple: '#8338EC',
+                        arcadeDark: '#0F172A',
+                    },
+                    animation: {
+                        'float': 'float 4s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-10px) rotate(3deg)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 15px rgba(239, 71, 111, 0.6), 0 0 30px rgba(131, 56, 236, 0.4)' },
+                            '50%': { boxShadow: '0 0 25px rgba(6, 214, 160, 0.8), 0 0 45px rgba(255, 209, 102, 0.6)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .heading-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255, 209, 102, 0.6);
+            box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(131, 56, 236, 0.3);
+        }
+
+        .master-glow {
+            border: 3px solid #FFD166;
+            box-shadow: 0 0 25px rgba(255, 209, 102, 0.4), inset 0 0 15px rgba(255, 209, 102, 0.2);
+        }
+
+        /* Interactive Buttons */
+        .arcade-btn {
+            position: relative;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+        }
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFD166;
+        }
+
+        /* Puzzle Background Canvas */
+        #puzzle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative select-none">
+
+    <!-- Interactive Canvas Background for floating puzzle pieces -->
+    <canvas id="puzzle-canvas"></canvas>
+
+    <!-- Top Navigation Header -->
+    <header class="relative z-10 w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Logo & Class Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-tr from-arcadePink to-arcadePurple rounded-2xl flex items-center justify-center shadow-lg shadow-arcadePink/30 animate-pulse-glow">
+                    <span class="text-2xl">🧩</span>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="heading-font text-2xl sm:text-3xl font-bold bg-gradient-to-r from-arcadeYellow via-arcadeGreen to-arcadeBlue bg-clip-text text-transparent">
+                            Mr./Ms. Kasunich's Arcade
+                        </h1>
+                        <span class="bg-arcadePink/20 text-arcadePink border border-arcadePink/40 text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider hidden sm:inline-block">
+                            5th Grade Hub
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium">Classroom Puzzle Showcase Directory</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center space-x-3">
+                <!-- Sound Effects Toggle Button -->
+                <button id="sound-toggle" onclick="toggleAudio()" class="arcade-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl flex items-center space-x-2 text-xs font-semibold text-slate-200" title="Toggle Sound FX">
+                    <span id="sound-icon" class="text-lg">🔊</span>
+                    <span id="sound-label" class="hidden md:inline">SFX: ON</span>
+                </button>
+
+                <!-- Surprise Me Random Game Selector -->
+                <button onclick="openRandomPicker()" class="arcade-btn px-4 py-2 bg-gradient-to-r from-arcadePink to-arcadePurple text-white rounded-xl font-bold text-sm flex items-center space-x-2 shadow-md hover:brightness-110">
+                    <span>🎲</span>
+                    <span>Surprise Me!</span>
+                </button>
+
+                <!-- GitHub Directory Info Toggle -->
+                <button onclick="toggleInstructionsModal()" class="arcade-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-xs font-semibold text-arcadeYellow flex items-center space-x-1.5" title="File Placement Info">
+                    <span>📁</span>
+                    <span class="hidden sm:inline">Path Guide</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-10">
+
+        <!-- Featured Master Game Banner -->
+        <section class="relative">
+            <div class="glass-card master-glow rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-slate-900/90 via-purple-950/40 to-slate-900/90">
+                <!-- Decorative background elements -->
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-arcadeYellow/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute right-12 top-4 text-8xl opacity-10 select-none pointer-events-none">👑</div>
+
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-3 text-center lg:text-left max-w-2xl">
+                        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-arcadeYellow/20 border border-arcadeYellow/40 text-arcadeYellow text-xs font-bold uppercase tracking-widest">
+                            <span>🏆</span>
+                            <span>Official Class Showcase</span>
+                        </div>
+                        <h2 id="master-title-display" class="heading-font text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+                            Master Puzzle Challenge
+                        </h2>
+                        <p id="master-desc-display" class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                            The ultimate combined puzzle experience! Featuring all team mechanics integrated into one giant 5th-grade class masterpiece.
+                        </p>
+                        
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-2">
+                            <span class="px-3 py-1 bg-slate-800/80 rounded-lg text-xs font-semibold text-arcadeYellow border border-slate-700">⭐ Master Edition</span>
+                            <span class="px-3 py-1 bg-slate-800/80 rounded-lg text-xs font-semibold text-arcadeGreen border border-slate-700">🎮 Multi-Level</span>
+                            <span class="px-3 py-1 bg-slate-800/80 rounded-lg text-xs font-semibold text-arcadeBlue border border-slate-700">🧩 Kasunich Class Project</span>
+                        </div>
+                    </div>
+
+                    <!-- Master Play Action & Edit Buttons -->
+                    <div class="flex flex-col sm:flex-row lg:flex-col items-center gap-3 w-full sm:w-auto">
+                        <a id="master-play-link" href="Master/index.html" onclick="playClickSound()" class="arcade-btn w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-arcadeYellow to-amber-500 text-slate-950 font-black text-lg rounded-2xl flex items-center justify-center space-x-3 shadow-xl hover:scale-105 transition-all text-center">
+                            <span class="text-2xl">🚀</span>
+                            <span>PLAY MASTER GAME</span>
+                        </a>
+
+                        <div class="flex items-center space-x-2 w-full justify-center">
+                            <button onclick="openEditor('master')" class="px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-xs text-slate-300 rounded-xl border border-slate-700 flex items-center space-x-1 transition-colors">
+                                <span>✏️</span>
+                                <span>Edit Details</span>
+                            </button>
+                            <button onclick="toggleFavorite('master')" id="master-fav-btn" class="px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-xs text-rose-400 rounded-xl border border-slate-700 flex items-center space-x-1 transition-colors">
+                                <span id="master-fav-icon">🤍</span>
+                                <span id="master-fav-count">0</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Controls -->
+        <section class="space-y-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <!-- Search Input -->
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        🔍
+                    </span>
+                    <input type="text" id="search-input" onkeyup="filterTeams()" placeholder="Search team games..." class="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-400 text-sm focus:outline-none focus:border-arcadeBlue transition-colors">
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end text-xs">
+                    <button onclick="setCategoryFilter('all')" class="cat-btn active px-3.5 py-2 rounded-xl font-bold bg-arcadeBlue text-white shadow-sm transition-all" data-cat="all">
+                        All Teams 🌟
+                    </button>
+                    <button onclick="setCategoryFilter('logic')" class="cat-btn px-3.5 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all" data-cat="logic">
+                        Logic 🧠
+                    </button>
+                    <button onclick="setCategoryFilter('arcade')" class="cat-btn px-3.5 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all" data-cat="arcade">
+                        Arcade 🕹️
+                    </button>
+                    <button onclick="setCategoryFilter('mystery')" class="cat-btn px-3.5 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all" data-cat="mystery">
+                        Mystery 🔍
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Cards Grid -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="heading-font text-2xl font-bold text-slate-100 flex items-center space-x-2">
+                    <span>👥</span>
+                    <span>Student Team Projects</span>
+                </h3>
+                <span id="team-count-badge" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
+                    Showing 5 Team Folders
+                </span>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="team-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </section>
+
+        <!-- Class Directory Setup Guide / Instructions Banner -->
+        <section class="bg-slate-900/80 rounded-2xl p-6 border border-slate-800 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <h4 class="heading-font text-lg font-bold text-arcadeYellow flex items-center space-x-2">
+                        <span>📌</span>
+                        <span>Kasunich Folder Structure Reference</span>
+                    </h4>
+                    <p class="text-xs text-slate-400">
+                        This page is designed to be saved as <code class="bg-slate-950 px-2 py-0.5 rounded text-arcadeGreen font-mono">Kasunich/index.html</code> inside your local repository.
+                    </p>
+                    <div class="bg-slate-950 p-3 rounded-xl font-mono text-xs text-slate-300 border border-slate-800 overflow-x-auto">
+                        <span class="text-slate-500">Local Directory Path:</span> C:\Users\postj\Documents\GitHub\puzzle-game\Kasunich\index.html
+                    </div>
+                </div>
+                <button onclick="toggleInstructionsModal()" class="arcade-btn px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-600 shrink-0">
+                    View Full Directory Tree 🌳
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-slate-800 bg-slate-950/80 py-6 text-center text-xs text-slate-500 space-y-2">
+        <p>Kasunich Class Puzzle Portal • Built for 5th Grade Computer Science & Logic Showcase</p>
+        <p class="text-slate-600">Tip: Click the pencil icon on any card to edit team titles and descriptions!</p>
+    </footer>
+
+    <!-- Random Game Selector Modal (Wheel / Spinner) -->
+    <div id="random-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 text-center space-y-6 border-2 border-arcadePink relative animate-bounce-slow">
+            <button onclick="closeRandomPicker()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+            
+            <div class="space-y-2">
+                <div class="text-5xl animate-spin inline-block">🎰</div>
+                <h3 class="heading-font text-2xl font-bold text-white">Random Game Wheel</h3>
+                <p class="text-xs text-slate-400">Can't decide which team to play? Let the Arcade Wheel choose!</p>
+            </div>
+
+            <!-- Spinning Showcase Box -->
+            <div id="spinner-box" class="bg-slate-950 p-6 rounded-2xl border-2 border-arcadeYellow text-center space-y-2 transition-all">
+                <div id="spinner-icon" class="text-4xl">❓</div>
+                <div id="spinner-title" class="heading-font text-xl font-bold text-arcadeYellow">Spinning...</div>
+                <div id="spinner-tagline" class="text-xs text-slate-400">Finding your next puzzle challenge!</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-3">
+                <button id="spin-btn" onclick="spinWheel()" class="arcade-btn flex-1 py-3 bg-gradient-to-r from-arcadePink to-arcadePurple text-white font-bold rounded-xl text-sm">
+                    Spin Again! 🔄
+                </button>
+                <a id="spin-play-btn" href="#" class="arcade-btn flex-1 py-3 bg-arcadeGreen text-slate-950 font-extrabold rounded-xl text-sm hidden flex items-center justify-center space-x-1">
+                    <span>PLAY NOW</span>
+                    <span>🎮</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Team Details Modal -->
+    <div id="editor-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-5 border border-slate-700 relative">
+            <button onclick="closeEditor()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+            <div class="space-y-1">
+                <h3 class="heading-font text-xl font-bold text-white flex items-center space-x-2">
+                    <span>✏️</span>
+                    <span>Customize Team Details</span>
+                </h3>
+                <p class="text-xs text-slate-400">Updates will be saved to your browser local storage.</p>
+            </div>
+
+            <form id="editor-form" onsubmit="saveTeamEdit(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="edit-team-id">
+
+                <div class="space-y-1">
+                    <label class="block font-semibold text-slate-300">Team / Project Name</label>
+                    <input type="text" id="edit-team-name" required class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-arcadeYellow">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block font-semibold text-slate-300">Game Description</label>
+                    <textarea id="edit-team-desc" rows="3" required class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-arcadeYellow"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block font-semibold text-slate-300">Category Tag</label>
+                        <select id="edit-team-cat" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-slate-200 text-xs">
+                            <option value="logic">Logic 🧠</option>
+                            <option value="arcade">Arcade 🕹️</option>
+                            <option value="mystery">Mystery 🔍</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block font-semibold text-slate-300">Avatar Emoji</label>
+                        <input type="text" id="edit-team-icon" maxlength="2" required class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-slate-200 text-sm text-center">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeEditor()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl font-semibold">Cancel</button>
+                    <button type="submit" class="arcade-btn px-5 py-2 bg-arcadeYellow text-slate-950 font-bold rounded-xl shadow-md">Save Changes 💾</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Directory Path Guide Modal -->
+    <div id="instructions-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-xl w-full rounded-3xl p-6 sm:p-8 space-y-5 border border-slate-700 relative">
+            <button onclick="toggleInstructionsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+            <div class="space-y-1">
+                <h3 class="heading-font text-2xl font-bold text-arcadeYellow flex items-center space-x-2">
+                    <span>📁</span>
+                    <span>Repository Path Map</span>
+                </h3>
+                <p class="text-xs text-slate-400">Ensure this landing page is placed at the root of the <code class="text-arcadeGreen">Kasunich</code> folder.</p>
+            </div>
+
+            <!-- Interactive Folder Tree Diagram -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 space-y-1.5 leading-relaxed">
+                <p class="text-arcadeYellow font-bold">C:\Users\postj\Documents\GitHub\puzzle-game\Kasunich\</p>
+                <p class="pl-4 text-arcadeGreen font-bold">├── 📄 index.html <span class="text-slate-500 font-normal">(THIS LANDING PAGE HUB)</span></p>
+                <p class="pl-4 text-slate-300">├── 📁 Master/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+                <p class="pl-4 text-slate-300">├── 📁 Team1/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+                <p class="pl-4 text-slate-300">├── 📁 Team2/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+                <p class="pl-4 text-slate-300">├── 📁 Team3/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+                <p class="pl-4 text-slate-300">├── 📁 Team4/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+                <p class="pl-4 text-slate-300">└── 📁 Team5/</p>
+                <p class="pl-8 text-slate-400">└── 📄 index.html</p>
+            </div>
+
+            <div class="bg-slate-900/90 p-3 rounded-xl text-xs text-slate-300 border border-slate-800 space-y-1">
+                <p class="font-bold text-slate-200">💡 Quick Tips for Classroom Setup:</p>
+                <ul class="list-disc pl-4 space-y-0.5 text-slate-400">
+                    <li>Each team should save their puzzle game as <code class="text-slate-200">index.html</code> inside their respective team folder.</li>
+                    <li>Links on this hub use relative paths like <code class="text-slate-200">Team1/index.html</code> so it works seamlessly offline and on GitHub Pages!</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="toggleInstructionsModal()" class="arcade-btn px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl">
+                    Got it! 👍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Web Audio API Synthesizer for 8-bit sound effects
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(freq, duration = 0.1, type = 'sine', slideTo = null) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                if (slideTo) {
+                    osc.frequency.exponentialRampToValueAtTime(slideTo, audioCtx.currentTime + duration);
+                }
+
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn('Audio play restricted:', e);
+            }
+        }
+
+        function playClickSound() {
+            playSound(587.33, 0.08, 'square', 880); // D5 to A5 retro chirp
+        }
+
+        function playWinSound() {
+            if (!soundEnabled) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playSound(freq, 0.12, 'triangle');
+                }, idx * 100);
+            });
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const label = document.getElementById('sound-label');
+            if (soundEnabled) {
+                icon.innerText = '🔊';
+                label.innerText = 'SFX: ON';
+                playClickSound();
+            } else {
+                icon.innerText = '🔇';
+                label.innerText = 'SFX: OFF';
+            }
+        }
+
+        // Canvas floating puzzle pieces animation
+        const canvas = document.getElementById('puzzle-canvas');
+        const ctx = canvas.getContext('2d');
+        let pieces = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class FloatingPuzzle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 20 + 15;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.vRot = (Math.random() - 0.5) * 0.01;
+                this.color = ['rgba(255, 209, 102, 0.15)', 'rgba(239, 71, 111, 0.15)', 'rgba(17, 138, 178, 0.15)', 'rgba(6, 214, 160, 0.15)', 'rgba(131, 56, 236, 0.15)'][Math.floor(Math.random() * 5)];
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.vRot;
+
+                if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = this.color;
+                
+                // Draw simple puzzle piece shape
+                const s = this.size;
+                ctx.beginPath();
+                ctx.rect(-s/2, -s/2, s, s);
+                ctx.arc(0, -s/2, s/4, 0, Math.PI, true);
+                ctx.arc(s/2, 0, s/4, -Math.PI/2, Math.PI/2, false);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 35; i++) {
+            pieces.push(new FloatingPuzzle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // Default Teams Configuration Data
+        const defaultTeams = [
+            {
+                id: 'team1',
+                folder: 'Team1',
+                name: 'Team 1: Cyber Solvers',
+                title: 'Laser Logic Maze',
+                desc: 'Bounce laser beams using mirror tiles to energize the core power grid!',
+                category: 'logic',
+                icon: '⚡',
+                color: 'from-cyan-500 to-blue-600',
+                badgeColor: 'text-cyan-400 bg-cyan-950/50 border-cyan-800'
+            },
+            {
+                id: 'team2',
+                folder: 'Team2',
+                name: 'Team 2: Quest Masters',
+                title: 'Dungeon Escape Puzzle',
+                desc: 'Find hidden keys, decipher ancient runes, and navigate mysterious maze rooms!',
+                category: 'mystery',
+                icon: '🗝️',
+                color: 'from-amber-500 to-red-600',
+                badgeColor: 'text-amber-400 bg-amber-950/50 border-amber-800'
+            },
+            {
+                id: 'team3',
+                folder: 'Team3',
+                name: 'Team 3: Pixel Pioneers',
+                title: 'Retro Block Blaster',
+                desc: 'Match color blocks in fast-paced arcade action before time runs out!',
+                category: 'arcade',
+                icon: '🎮',
+                color: 'from-purple-500 to-pink-600',
+                badgeColor: 'text-purple-400 bg-purple-950/50 border-purple-800'
+            },
+            {
+                id: 'team4',
+                folder: 'Team4',
+                name: 'Team 4: Logic Legends',
+                title: 'Memory Matrix Machine',
+                desc: 'Train your brain by repeating intricate glowing color sequences and patterns!',
+                category: 'logic',
+                icon: '🧠',
+                color: 'from-emerald-500 to-teal-600',
+                badgeColor: 'text-emerald-400 bg-emerald-950/50 border-emerald-800'
+            },
+            {
+                id: 'team5',
+                folder: 'Team5',
+                name: 'Team 5: Gravity Navigators',
+                title: 'Orbital Planet Slider',
+                desc: 'Slide planets and dodge space obstacles to align solar systems safely!',
+                category: 'arcade',
+                icon: '🚀',
+                color: 'from-indigo-500 to-sky-600',
+                badgeColor: 'text-indigo-400 bg-indigo-950/50 border-indigo-800'
+            }
+        ];
+
+        let teamsData = [];
+        let activeCategory = 'all';
+
+        // Load data from LocalStorage or Fallback
+        function loadTeamsData() {
+            const stored = localStorage.getItem('kasunich_teams_data');
+            if (stored) {
+                try {
+                    teamsData = JSON.parse(stored);
+                } catch(e) {
+                    teamsData = [...defaultTeams];
+                }
+            } else {
+                teamsData = [...defaultTeams];
+            }
+
+            // Load Master edit
+            const masterStored = localStorage.getItem('kasunich_master_data');
+            if (masterStored) {
+                try {
+                    const m = JSON.parse(masterStored);
+                    document.getElementById('master-title-display').innerText = m.name;
+                    document.getElementById('master-desc-display').innerText = m.desc;
+                } catch(e) {}
+            }
+
+            updateFavoritesCount();
+            renderTeamCards();
+        }
+
+        function saveTeamsData() {
+            localStorage.setItem('kasunich_teams_data', JSON.stringify(teamsData));
+            renderTeamCards();
+        }
+
+        function renderTeamCards() {
+            const grid = document.getElementById('team-cards-grid');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            grid.innerHTML = '';
+
+            let visibleCount = 0;
+
+            teamsData.forEach(team => {
+                const matchesCat = (activeCategory === 'all' || team.category === activeCategory);
+                const matchesSearch = (team.name.toLowerCase().includes(searchVal) || team.title.toLowerCase().includes(searchVal) || team.desc.toLowerCase().includes(searchVal));
+
+                if (matchesCat && matchesSearch) {
+                    visibleCount++;
+                    const favs = getFavCount(team.id);
+                    const isFav = isFavorited(team.id);
+
+                    const card = document.createElement('div');
+                    card.className = 'glass-card rounded-3xl p-6 flex flex-col justify-between space-y-4 relative group';
+                    card.innerHTML = `
+                        <!-- Card Header -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${team.badgeColor}">
+                                    ${team.folder}/
+                                </span>
+                                <div class="flex items-center space-x-1">
+                                    <button onclick="openEditor('${team.id}')" class="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg text-xs" title="Edit Card">✏️</button>
+                                    <button onclick="toggleFavorite('${team.id}')" class="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-xs rounded-lg flex items-center space-x-1">
+                                        <span>${isFav ? '❤️' : '🤍'}</span>
+                                        <span class="text-slate-300 text-xs font-bold">${favs}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${team.color} flex items-center justify-center text-2xl shadow-md shrink-0">
+                                    ${team.icon}
+                                </div>
+                                <div>
+                                    <h4 class="heading-font text-lg font-bold text-white group-hover:text-arcadeYellow transition-colors line-clamp-1">${team.name}</h4>
+                                    <p class="text-xs text-slate-400 font-semibold">${team.title}</p>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">${team.desc}</p>
+                        </div>
+
+                        <!-- Card Action Link -->
+                        <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                            <a href="${team.folder}/index.html" onclick="playClickSound()" class="arcade-btn w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-arcadeYellow font-bold rounded-xl text-xs flex items-center justify-center space-x-2 border border-slate-700 hover:border-arcadeYellow transition-all">
+                                <span>PLAY GAME</span>
+                                <span>🎮</span>
+                            </a>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+            });
+
+            document.getElementById('team-count-badge').innerText = `Showing ${visibleCount} Team Folders`;
+            if (visibleCount === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center space-y-3 bg-slate-900/40 rounded-3xl border border-slate-800">
+                        <div class="text-4xl">🔍</div>
+                        <h4 class="heading-font text-lg font-bold text-slate-300">No Games Found</h4>
+                        <p class="text-xs text-slate-500">Try adjusting your search terms or filter selection.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setCategoryFilter(cat) {
+            playClickSound();
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.getAttribute('data-cat') === cat) {
+                    btn.classList.add('bg-arcadeBlue', 'text-white', 'font-bold');
+                    btn.classList.remove('bg-slate-800', 'text-slate-300');
+                } else {
+                    btn.classList.remove('bg-arcadeBlue', 'text-white', 'font-bold');
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                }
+            });
+            renderTeamCards();
+        }
+
+        function filterTeams() {
+            renderTeamCards();
+        }
+
+        // Random Wheel Selector Logic
+        let isSpinning = false;
+
+        function openRandomPicker() {
+            playClickSound();
+            document.getElementById('random-modal').classList.remove('hidden');
+            document.getElementById('spin-play-btn').classList.add('hidden');
+            document.getElementById('spinner-title').innerText = "Ready to Spin!";
+            document.getElementById('spinner-icon').innerText = "🎲";
+            document.getElementById('spinner-tagline').innerText = "Click spin to pick a team game!";
+        }
+
+        function closeRandomPicker() {
+            playClickSound();
+            document.getElementById('random-modal').classList.add('hidden');
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            const spinBtn = document.getElementById('spin-btn');
+            const playBtn = document.getElementById('spin-play-btn');
+            const icon = document.getElementById('spinner-icon');
+            const title = document.getElementById('spinner-title');
+            const tagline = document.getElementById('spinner-tagline');
+
+            spinBtn.disabled = true;
+            spinBtn.classList.add('opacity-50');
+            playBtn.classList.add('hidden');
+
+            let counter = 0;
+            const maxSpins = 20;
+
+            const interval = setInterval(() => {
+                const randomItem = teamsData[Math.floor(Math.random() * teamsData.length)];
+                icon.innerText = randomItem.icon;
+                title.innerText = randomItem.name;
+                tagline.innerText = randomItem.title;
+                playSound(300 + counter * 25, 0.05, 'square');
+                counter++;
+
+                if (counter >= maxSpins) {
+                    clearInterval(interval);
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    spinBtn.classList.remove('opacity-50');
+
+                    // Final Pick
+                    const finalPick = teamsData[Math.floor(Math.random() * teamsData.length)];
+                    icon.innerText = finalPick.icon;
+                    title.innerText = finalPick.name;
+                    tagline.innerText = `Selected: ${finalPick.title}`;
+
+                    playBtn.href = `${finalPick.folder}/index.html`;
+                    playBtn.classList.remove('hidden');
+                    playWinSound();
+                }
+            }, 100);
+        }
+
+        // Favorites / Likes Logic
+        function toggleFavorite(id) {
+            playClickSound();
+            let favs = JSON.parse(localStorage.getItem('kasunich_favs') || '{}');
+            if (favs[id]) {
+                delete favs[id];
+            } else {
+                favs[id] = true;
+            }
+            localStorage.setItem('kasunich_favs', JSON.stringify(favs));
+            updateFavoritesCount();
+            renderTeamCards();
+        }
+
+        function isFavorited(id) {
+            const favs = JSON.parse(localStorage.getItem('kasunich_favs') || '{}');
+            return !!favs[id];
+        }
+
+        function getFavCount(id) {
+            const isFav = isFavorited(id);
+            return isFav ? 1 : 0;
+        }
+
+        function updateFavoritesCount() {
+            const masterFav = isFavorited('master');
+            document.getElementById('master-fav-icon').innerText = masterFav ? '❤️' : '🤍';
+            document.getElementById('master-fav-count').innerText = masterFav ? '1' : '0';
+        }
+
+        // Team Details Modal Editor Logic
+        function openEditor(id) {
+            playClickSound();
+            document.getElementById('edit-team-id').value = id;
+
+            if (id === 'master') {
+                const currentTitle = document.getElementById('master-title-display').innerText;
+                const currentDesc = document.getElementById('master-desc-display').innerText;
+                document.getElementById('edit-team-name').value = currentTitle;
+                document.getElementById('edit-team-desc').value = currentDesc;
+                document.getElementById('edit-team-icon').value = '👑';
+                document.getElementById('edit-team-cat').value = 'logic';
+            } else {
+                const team = teamsData.find(t => t.id === id);
+                if (team) {
+                    document.getElementById('edit-team-name').value = team.name;
+                    document.getElementById('edit-team-desc').value = team.desc;
+                    document.getElementById('edit-team-icon').value = team.icon;
+                    document.getElementById('edit-team-cat').value = team.category;
+                }
+            }
+
+            document.getElementById('editor-modal').classList.remove('hidden');
+        }
+
+        function closeEditor() {
+            playClickSound();
+            document.getElementById('editor-modal').classList.add('hidden');
+        }
+
+        function saveTeamEdit(e) {
+            e.preventDefault();
+            playWinSound();
+
+            const id = document.getElementById('edit-team-id').value;
+            const name = document.getElementById('edit-team-name').value;
+            const desc = document.getElementById('edit-team-desc').value;
+            const icon = document.getElementById('edit-team-icon').value;
+            const cat = document.getElementById('edit-team-cat').value;
+
+            if (id === 'master') {
+                document.getElementById('master-title-display').innerText = name;
+                document.getElementById('master-desc-display').innerText = desc;
+                localStorage.setItem('kasunich_master_data', JSON.stringify({ name, desc }));
+            } else {
+                const idx = teamsData.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    teamsData[idx].name = name;
+                    teamsData[idx].desc = desc;
+                    teamsData[idx].icon = icon;
+                    teamsData[idx].category = cat;
+                    saveTeamsData();
+                }
+            }
+
+            closeEditor();
+        }
+
+        function toggleInstructionsModal() {
+            playClickSound();
+            document.getElementById('instructions-modal').classList.toggle('hidden');
+        }
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTeamsData();
+        });
+    </script>
+</body>
+</html>
